@@ -20,11 +20,11 @@ import { Route as publicShareSecretPageRouteImport } from './pages/public/ShareS
 import { Route as authCliRedirectPageRouteImport } from './pages/auth/CliRedirectPage/route'
 import { Route as indexImport } from './pages/index'
 import { Route as middlewaresInjectOrgDetailsImport } from './pages/middlewares/inject-org-details'
-import { Route as authVerifyEmailPageRouteImport } from './pages/auth/VerifyEmailPage/route'
 import { Route as authSignUpInvitePageRouteImport } from './pages/auth/SignUpInvitePage/route'
 import { Route as authRequestNewInvitePageRouteImport } from './pages/auth/RequestNewInvitePage/route'
 import { Route as authPasswordResetPageRouteImport } from './pages/auth/PasswordResetPage/route'
 import { Route as authEmailNotVerifiedPageRouteImport } from './pages/auth/EmailNotVerifiedPage/route'
+import { Route as authAccountRecoveryPageRouteImport } from './pages/auth/AccountRecoveryPage/route'
 import { Route as authPasswordSetupPageRouteImport } from './pages/auth/PasswordSetupPage/route'
 import { Route as userLayoutImport } from './pages/user/layout'
 import { Route as organizationLayoutImport } from './pages/organization/layout'
@@ -426,12 +426,6 @@ const middlewaresInjectOrgDetailsRoute =
     getParentRoute: () => middlewaresAuthenticateRoute,
   } as any)
 
-const authVerifyEmailPageRouteRoute = authVerifyEmailPageRouteImport.update({
-  id: '/verify-email',
-  path: '/verify-email',
-  getParentRoute: () => middlewaresRestrictLoginSignupRoute,
-} as any)
-
 const authSignUpInvitePageRouteRoute = authSignUpInvitePageRouteImport.update({
   id: '/signupinvite',
   path: '/signupinvite',
@@ -457,6 +451,13 @@ const authEmailNotVerifiedPageRouteRoute =
   authEmailNotVerifiedPageRouteImport.update({
     id: '/email-not-verified',
     path: '/email-not-verified',
+    getParentRoute: () => middlewaresRestrictLoginSignupRoute,
+  } as any)
+
+const authAccountRecoveryPageRouteRoute =
+  authAccountRecoveryPageRouteImport.update({
+    id: '/account-recovery',
+    path: '/account-recovery',
     getParentRoute: () => middlewaresRestrictLoginSignupRoute,
   } as any)
 
@@ -2408,6 +2409,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authPasswordSetupPageRouteImport
       parentRoute: typeof middlewaresAuthenticateImport
     }
+    '/_restrict-login-signup/account-recovery': {
+      id: '/_restrict-login-signup/account-recovery'
+      path: '/account-recovery'
+      fullPath: '/account-recovery'
+      preLoaderRoute: typeof authAccountRecoveryPageRouteImport
+      parentRoute: typeof middlewaresRestrictLoginSignupImport
+    }
     '/_restrict-login-signup/email-not-verified': {
       id: '/_restrict-login-signup/email-not-verified'
       path: '/email-not-verified'
@@ -2434,13 +2442,6 @@ declare module '@tanstack/react-router' {
       path: '/signupinvite'
       fullPath: '/signupinvite'
       preLoaderRoute: typeof authSignUpInvitePageRouteImport
-      parentRoute: typeof middlewaresRestrictLoginSignupImport
-    }
-    '/_restrict-login-signup/verify-email': {
-      id: '/_restrict-login-signup/verify-email'
-      path: '/verify-email'
-      fullPath: '/verify-email'
-      preLoaderRoute: typeof authVerifyEmailPageRouteImport
       parentRoute: typeof middlewaresRestrictLoginSignupImport
     }
     '/_authenticate/_inject-org-details': {
@@ -5348,11 +5349,11 @@ const RestrictLoginSignupSignupRouteWithChildren =
   )
 
 interface middlewaresRestrictLoginSignupRouteChildren {
+  authAccountRecoveryPageRouteRoute: typeof authAccountRecoveryPageRouteRoute
   authEmailNotVerifiedPageRouteRoute: typeof authEmailNotVerifiedPageRouteRoute
   authPasswordResetPageRouteRoute: typeof authPasswordResetPageRouteRoute
   authRequestNewInvitePageRouteRoute: typeof authRequestNewInvitePageRouteRoute
   authSignUpInvitePageRouteRoute: typeof authSignUpInvitePageRouteRoute
-  authVerifyEmailPageRouteRoute: typeof authVerifyEmailPageRouteRoute
   RestrictLoginSignupLoginRoute: typeof RestrictLoginSignupLoginRouteWithChildren
   RestrictLoginSignupSignupRoute: typeof RestrictLoginSignupSignupRouteWithChildren
   adminSignUpPageRouteRoute: typeof adminSignUpPageRouteRoute
@@ -5360,11 +5361,11 @@ interface middlewaresRestrictLoginSignupRouteChildren {
 
 const middlewaresRestrictLoginSignupRouteChildren: middlewaresRestrictLoginSignupRouteChildren =
   {
+    authAccountRecoveryPageRouteRoute: authAccountRecoveryPageRouteRoute,
     authEmailNotVerifiedPageRouteRoute: authEmailNotVerifiedPageRouteRoute,
     authPasswordResetPageRouteRoute: authPasswordResetPageRouteRoute,
     authRequestNewInvitePageRouteRoute: authRequestNewInvitePageRouteRoute,
     authSignUpInvitePageRouteRoute: authSignUpInvitePageRouteRoute,
-    authVerifyEmailPageRouteRoute: authVerifyEmailPageRouteRoute,
     RestrictLoginSignupLoginRoute: RestrictLoginSignupLoginRouteWithChildren,
     RestrictLoginSignupSignupRoute: RestrictLoginSignupSignupRouteWithChildren,
     adminSignUpPageRouteRoute: adminSignUpPageRouteRoute,
@@ -5382,11 +5383,11 @@ export interface FileRoutesByFullPath {
   '/upgrade-path': typeof publicUpgradePathPageRouteRoute
   '': typeof organizationLayoutRouteWithChildren
   '/password-setup': typeof authPasswordSetupPageRouteRoute
+  '/account-recovery': typeof authAccountRecoveryPageRouteRoute
   '/email-not-verified': typeof authEmailNotVerifiedPageRouteRoute
   '/password-reset': typeof authPasswordResetPageRouteRoute
   '/requestnewinvite': typeof authRequestNewInvitePageRouteRoute
   '/signupinvite': typeof authSignUpInvitePageRouteRoute
-  '/verify-email': typeof authVerifyEmailPageRouteRoute
   '/personal-settings': typeof userLayoutRouteWithChildren
   '/login': typeof RestrictLoginSignupLoginRouteWithChildren
   '/signup': typeof RestrictLoginSignupSignupRouteWithChildren
@@ -5640,11 +5641,11 @@ export interface FileRoutesByTo {
   '/upgrade-path': typeof publicUpgradePathPageRouteRoute
   '': typeof organizationLayoutRouteWithChildren
   '/password-setup': typeof authPasswordSetupPageRouteRoute
+  '/account-recovery': typeof authAccountRecoveryPageRouteRoute
   '/email-not-verified': typeof authEmailNotVerifiedPageRouteRoute
   '/password-reset': typeof authPasswordResetPageRouteRoute
   '/requestnewinvite': typeof authRequestNewInvitePageRouteRoute
   '/signupinvite': typeof authSignUpInvitePageRouteRoute
-  '/verify-email': typeof authVerifyEmailPageRouteRoute
   '/personal-settings': typeof userPersonalSettingsPageRouteRoute
   '/login': typeof authLoginPageRouteRoute
   '/signup': typeof authSignUpPageRouteRoute
@@ -5885,11 +5886,11 @@ export interface FileRoutesById {
   '/_authenticate': typeof middlewaresAuthenticateRouteWithChildren
   '/_restrict-login-signup': typeof middlewaresRestrictLoginSignupRouteWithChildren
   '/_authenticate/password-setup': typeof authPasswordSetupPageRouteRoute
+  '/_restrict-login-signup/account-recovery': typeof authAccountRecoveryPageRouteRoute
   '/_restrict-login-signup/email-not-verified': typeof authEmailNotVerifiedPageRouteRoute
   '/_restrict-login-signup/password-reset': typeof authPasswordResetPageRouteRoute
   '/_restrict-login-signup/requestnewinvite': typeof authRequestNewInvitePageRouteRoute
   '/_restrict-login-signup/signupinvite': typeof authSignUpInvitePageRouteRoute
-  '/_restrict-login-signup/verify-email': typeof authVerifyEmailPageRouteRoute
   '/_authenticate/_inject-org-details': typeof middlewaresInjectOrgDetailsRouteWithChildren
   '/_authenticate/personal-settings': typeof AuthenticatePersonalSettingsRouteWithChildren
   '/_restrict-login-signup/login': typeof RestrictLoginSignupLoginRouteWithChildren
@@ -6156,11 +6157,11 @@ export interface FileRouteTypes {
     | '/upgrade-path'
     | ''
     | '/password-setup'
+    | '/account-recovery'
     | '/email-not-verified'
     | '/password-reset'
     | '/requestnewinvite'
     | '/signupinvite'
-    | '/verify-email'
     | '/personal-settings'
     | '/login'
     | '/signup'
@@ -6413,11 +6414,11 @@ export interface FileRouteTypes {
     | '/upgrade-path'
     | ''
     | '/password-setup'
+    | '/account-recovery'
     | '/email-not-verified'
     | '/password-reset'
     | '/requestnewinvite'
     | '/signupinvite'
-    | '/verify-email'
     | '/personal-settings'
     | '/login'
     | '/signup'
@@ -6656,11 +6657,11 @@ export interface FileRouteTypes {
     | '/_authenticate'
     | '/_restrict-login-signup'
     | '/_authenticate/password-setup'
+    | '/_restrict-login-signup/account-recovery'
     | '/_restrict-login-signup/email-not-verified'
     | '/_restrict-login-signup/password-reset'
     | '/_restrict-login-signup/requestnewinvite'
     | '/_restrict-login-signup/signupinvite'
-    | '/_restrict-login-signup/verify-email'
     | '/_authenticate/_inject-org-details'
     | '/_authenticate/personal-settings'
     | '/_restrict-login-signup/login'
@@ -6990,11 +6991,11 @@ export const routeTree = rootRoute
     "/_restrict-login-signup": {
       "filePath": "middlewares/restrict-login-signup.tsx",
       "children": [
+        "/_restrict-login-signup/account-recovery",
         "/_restrict-login-signup/email-not-verified",
         "/_restrict-login-signup/password-reset",
         "/_restrict-login-signup/requestnewinvite",
         "/_restrict-login-signup/signupinvite",
-        "/_restrict-login-signup/verify-email",
         "/_restrict-login-signup/login",
         "/_restrict-login-signup/signup",
         "/_restrict-login-signup/admin/signup"
@@ -7003,6 +7004,10 @@ export const routeTree = rootRoute
     "/_authenticate/password-setup": {
       "filePath": "auth/PasswordSetupPage/route.tsx",
       "parent": "/_authenticate"
+    },
+    "/_restrict-login-signup/account-recovery": {
+      "filePath": "auth/AccountRecoveryPage/route.tsx",
+      "parent": "/_restrict-login-signup"
     },
     "/_restrict-login-signup/email-not-verified": {
       "filePath": "auth/EmailNotVerifiedPage/route.tsx",
@@ -7018,10 +7023,6 @@ export const routeTree = rootRoute
     },
     "/_restrict-login-signup/signupinvite": {
       "filePath": "auth/SignUpInvitePage/route.tsx",
-      "parent": "/_restrict-login-signup"
-    },
-    "/_restrict-login-signup/verify-email": {
-      "filePath": "auth/VerifyEmailPage/route.tsx",
       "parent": "/_restrict-login-signup"
     },
     "/_authenticate/_inject-org-details": {
