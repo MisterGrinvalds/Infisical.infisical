@@ -1,0 +1,85 @@
+# KIND-specific values for Infisical
+# ===================================
+# Optimized for local development on KIND cluster
+#
+# Prerequisites:
+#   1. Create the infisical-secrets secret (see secrets-template.yaml)
+#   2. Ensure ingress is configured (make ingress-install)
+#
+# Usage:
+#   helm install infisical ./forks/infisical/helm-charts/infisical-standalone-postgres \
+#     -f ./forks/infisical/values_kind.yaml \
+#     -n infisical --create-namespace
+
+infisical:
+  # Single replica for local development
+  replicaCount: 1
+
+  # Reference to secrets (must be created before install)
+  kubeSecretRef: "infisical-secrets"
+
+  # Reduced resources for local development
+  resources:
+    limits:
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+
+  # Service configuration
+  service:
+    type: ClusterIP
+
+# Ingress configuration for local access
+ingress:
+  enabled: true
+  hostName: "infisical.localhost"
+  ingressClassName: nginx
+
+  nginx:
+    enabled: false  # We use cloud-provider-kind, not bundled nginx
+
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+
+# PostgreSQL - use in-cluster for development
+postgresql:
+  enabled: true
+  fullnameOverride: "infisical-postgresql"
+
+  auth:
+    username: infisical
+    password: infisical-dev-password
+    database: infisicalDB
+
+  primary:
+    persistence:
+      enabled: false  # Ephemeral for dev
+
+    resources:
+      limits:
+        memory: 256Mi
+      requests:
+        cpu: 50m
+        memory: 128Mi
+
+# Redis - use in-cluster for development
+redis:
+  enabled: true
+  fullnameOverride: "infisical-redis"
+
+  auth:
+    password: "redis-dev-password"
+
+  architecture: standalone
+
+  master:
+    persistence:
+      enabled: false  # Ephemeral for dev
+
+    resources:
+      limits:
+        memory: 128Mi
+      requests:
+        cpu: 25m
+        memory: 64Mi
