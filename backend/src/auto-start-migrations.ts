@@ -2,13 +2,21 @@ import crypto from "node:crypto";
 import os from "node:os";
 import path from "node:path";
 
+import { type ClickHouseClient } from "@clickhouse/client";
 import dotenv from "dotenv";
 import { Knex } from "knex";
 import { Logger } from "pino";
 
+import { getConfig } from "@app/lib/config/env";
 import { applyJitter, delay } from "@app/lib/delay";
 
-import { acquireSanitizedSchemaLock, createSanitizedSchema, dropSanitizedSchema } from "./db/sanitized-schema";
+import { ensureClickHouseSchema } from "./db/clickhouse-migration-runner";
+import {
+  acquireSanitizedSchemaLock,
+  createSanitizedSchema,
+  dropSanitizedSchema,
+  grantSanitizedSchemaAccess
+} from "./db/sanitized-schema";
 import { PgSqlLock } from "./keystore/keystore";
 
 const SANITIZED_SCHEMA_ERROR = "SANITIZED_SCHEMA_ERROR";
@@ -18,6 +26,7 @@ dotenv.config();
 type TArgs = {
   auditLogDb?: Knex;
   applicationDb: Knex;
+  clickhouseClient?: ClickHouseClient | null;
   logger: Logger;
 };
 
@@ -286,7 +295,7 @@ const withStartupLock = async (db: Knex, logger: Logger, doMigrations: () => Pro
   }
 };
 
-export const runMigrations = async ({ applicationDb, auditLogDb, logger }: TArgs) => {
+export const runMigrations = async ({ applicationDb, auditLogDb, clickhouseClient, logger }: TArgs) => {
   const generateSanitizedSchema = process.env.GENERATE_SANITIZED_SCHEMA === "true";
 
   try {
@@ -315,6 +324,26 @@ export const runMigrations = async ({ applicationDb, auditLogDb, logger }: TArgs
       }
     }
 
+    // Ensure ClickHouse audit_logs table exists if configured
+    if (clickhouseClient) {
+      logger.info("Ensuring ClickHouse audit_logs table exists ...");
+      try {
+        const cfg = getConfig();
+        await ensureClickHouseSchema({
+          client: clickhouseClient,
+          tableName: cfg.CLICKHOUSE_AUDIT_LOG_TABLE_NAME,
+          engine: cfg.CLICKHOUSE_AUDIT_LOG_ENGINE,
+          logger
+        });
+      } catch (clickhouseErr) {
+        logger.error(clickhouseErr, "ClickHouse schema setup failed");
+        process.exit(1);
+      }
+      logger.info("Finished ensuring ClickHouse audit_logs table exists.");
+    } else {
+      logger.info("No ClickHouse client configured: Skipping ClickHouse audit_logs table creation.");
+    }
+
     const shouldRunMigration = Boolean(
       await applicationDb.migrate.status(migrationConfig).catch(migrationStatusCheckErrorHandler)
     ); // db.length - code.length
@@ -322,19 +351,23 @@ export const runMigrations = async ({ applicationDb, auditLogDb, logger }: TArgs
       logger.info("No migrations pending: Skipping migration process.");
 
       if (generateSanitizedSchema) {
+        const sanitizedSchemaRole = process.env.SANITIZED_SCHEMA_ROLE;
         try {
           await applicationDb.transaction(async (tx) => {
             const isLocked = await acquireSanitizedSchemaLock({ db: tx, logger });
             if (isLocked) {
               await dropSanitizedSchema({ db: tx, logger });
               await createSanitizedSchema({ db: tx, logger });
+              if (sanitizedSchemaRole) {
+                await grantSanitizedSchemaAccess({ db: tx, logger, role: sanitizedSchemaRole });
+              }
               logger.info("Finished sanitized schema generation.");
             }
           });
         } catch (err) {
           logger.error(
-            { err, errorId: SANITIZED_SCHEMA_ERROR, phase: "drop" },
-            `${SANITIZED_SCHEMA_ERROR}: Failed to drop and recreate sanitized schema`
+            { err, errorId: SANITIZED_SCHEMA_ERROR, phase: "recreate" },
+            `${SANITIZED_SCHEMA_ERROR}: Failed to recreate sanitized schema`
           );
         }
       }
@@ -361,6 +394,7 @@ export const runMigrations = async ({ applicationDb, auditLogDb, logger }: TArgs
 
     await ensureMigrationTables(applicationDb, logger);
     logger.info("Running application migrations.");
+
     const didPreviousInstanceRunMigration = !(await applicationDb.migrate
       .status(migrationConfig)
       .catch(migrationStatusCheckErrorHandler));
@@ -378,8 +412,12 @@ export const runMigrations = async ({ applicationDb, auditLogDb, logger }: TArgs
 
     // we create the sanitized schema after migrations to avoid conflicts with the migrations
     if (generateSanitizedSchema) {
+      const sanitizedSchemaRole = process.env.SANITIZED_SCHEMA_ROLE;
       try {
         await createSanitizedSchema({ db: applicationDb, logger });
+        if (sanitizedSchemaRole) {
+          await grantSanitizedSchemaAccess({ db: applicationDb, logger, role: sanitizedSchemaRole });
+        }
         logger.info("Finished sanitized schema generation.");
       } catch (err) {
         logger.error(
