@@ -99,6 +99,8 @@ import { pamDiscoverySourceDependenciesDALFactory } from "@app/ee/services/pam-d
 import { pamDiscoverySourceResourcesDALFactory } from "@app/ee/services/pam-discovery/pam-discovery-source-resources-dal";
 import { pamDiscoveryRunDALFactory } from "@app/ee/services/pam-discovery/pam-discovery-source-run-dal";
 import { pamDiscoverySourceServiceFactory } from "@app/ee/services/pam-discovery/pam-discovery-source-service";
+import { pamDomainDALFactory } from "@app/ee/services/pam-domain/pam-domain-dal";
+import { pamDomainServiceFactory } from "@app/ee/services/pam-domain/pam-domain-service";
 import { pamFolderDALFactory } from "@app/ee/services/pam-folder/pam-folder-dal";
 import { pamFolderServiceFactory } from "@app/ee/services/pam-folder/pam-folder-service";
 import { pamResourceDALFactory } from "@app/ee/services/pam-resource/pam-resource-dal";
@@ -450,7 +452,6 @@ import { telemetryQueueServiceFactory } from "@app/services/telemetry/telemetry-
 import { telemetryServiceFactory } from "@app/services/telemetry/telemetry-service";
 import { totpConfigDALFactory } from "@app/services/totp/totp-config-dal";
 import { totpServiceFactory } from "@app/services/totp/totp-service";
-import { upgradePathServiceFactory } from "@app/services/upgrade-path/upgrade-path-service";
 import { userDALFactory } from "@app/services/user/user-dal";
 import { userServiceFactory } from "@app/services/user/user-service";
 import { userAliasDALFactory } from "@app/services/user-alias/user-alias-dal";
@@ -982,8 +983,6 @@ export const registerRoutes = async (
     userAliasDAL,
     membershipUserDAL
   });
-
-  const upgradePathService = upgradePathServiceFactory({ keyStore });
 
   const totpService = totpServiceFactory({
     totpConfigDAL,
@@ -2845,6 +2844,7 @@ export const registerRoutes = async (
   });
 
   const pamFolderDAL = pamFolderDALFactory(db);
+  const pamDomainDAL = pamDomainDALFactory(db);
   const pamResourceFavoriteDAL = pamResourceFavoriteDALFactory(db);
   const pamAccountDAL = pamAccountDALFactory(db);
   const pamAccountPolicyDAL = pamAccountPolicyDALFactory(db);
@@ -2872,12 +2872,22 @@ export const registerRoutes = async (
   const pamResourceService = pamResourceServiceFactory({
     pamResourceDAL,
     pamResourceFavoriteDAL,
+    pamDomainDAL,
     pamAccountDAL,
     permissionService,
     kmsService,
     gatewayV2Service,
     resourceMetadataDAL,
     appConnectionDAL
+  });
+
+  const pamDomainService = pamDomainServiceFactory({
+    pamDomainDAL,
+    pamResourceDAL,
+    permissionService,
+    kmsService,
+    gatewayV2Service,
+    resourceMetadataDAL
   });
 
   const pamResourceRotationRulesService = pamResourceRotationRulesServiceFactory({
@@ -2915,6 +2925,7 @@ export const registerRoutes = async (
 
   const pamAccountService = pamAccountServiceFactory({
     pamAccountDAL,
+    pamDomainDAL,
     pamAccountPolicyDAL,
     pamResourceRotationRulesDAL,
     gatewayV2Service,
@@ -2977,6 +2988,7 @@ export const registerRoutes = async (
     pamDiscoverySourceAccountsDAL,
     pamDiscoverySourceDependenciesDAL,
     pamAccountDependenciesDAL,
+    pamDomainDAL,
     pamResourceDAL,
     pamAccountDAL,
     kmsService,
@@ -3235,6 +3247,7 @@ export const registerRoutes = async (
     notification: notificationService,
     pamFolder: pamFolderService,
     pamResource: pamResourceService,
+    pamDomain: pamDomainService,
     pamResourceRotationRules: pamResourceRotationRulesService,
     pamAccount: pamAccountService,
     pamAccountPolicy: pamAccountPolicyService,
@@ -3242,8 +3255,6 @@ export const registerRoutes = async (
     pamWebAccess: pamWebAccessService,
     pamDiscoverySource: pamDiscoverySourceService,
     mfaSession: mfaSessionService,
-    upgradePath: upgradePathService,
-
     membershipUser: membershipUserService,
     membershipIdentity: membershipIdentityService,
     membershipGroup: membershipGroupService,
