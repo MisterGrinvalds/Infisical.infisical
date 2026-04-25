@@ -146,6 +146,7 @@
                       "integrations/app-connections/netlify",
                       "integrations/app-connections/netscaler",
                       "integrations/app-connections/northflank",
+                      "integrations/app-connections/ona",
                       "integrations/app-connections/oci",
                       "integrations/app-connections/octopus-deploy",
                       "integrations/app-connections/okta",
@@ -482,6 +483,7 @@
                       "documentation/platform/secret-rotation/oracledb-credentials",
                       "documentation/platform/secret-rotation/postgres-credentials",
                       "documentation/platform/secret-rotation/redis-credentials",
+                      "documentation/platform/secret-rotation/supabase-api-key",
                       "documentation/platform/secret-rotation/unix-linux-local-account",
                       "documentation/platform/secret-rotation/windows-local-account"
                     ]
@@ -600,6 +602,7 @@
                       "integrations/secret-syncs/laravel-forge",
                       "integrations/secret-syncs/netlify",
                       "integrations/secret-syncs/northflank",
+                      "integrations/secret-syncs/ona",
                       "integrations/secret-syncs/oci-vault",
                       "integrations/secret-syncs/octopus-deploy",
                       "integrations/secret-syncs/railway",
@@ -2378,6 +2381,19 @@
                       "api-reference/endpoints/secret-rotations/redis-credentials/list",
                       "api-reference/endpoints/secret-rotations/redis-credentials/rotate-secrets",
                       "api-reference/endpoints/secret-rotations/redis-credentials/update"
+                    ]
+                  },
+                  {
+                    "group": "Supabase API Key",
+                    "pages": [
+                      "api-reference/endpoints/secret-rotations/supabase-api-key/create",
+                      "api-reference/endpoints/secret-rotations/supabase-api-key/delete",
+                      "api-reference/endpoints/secret-rotations/supabase-api-key/get-by-id",
+                      "api-reference/endpoints/secret-rotations/supabase-api-key/get-by-name",
+                      "api-reference/endpoints/secret-rotations/supabase-api-key/get-generated-credentials-by-id",
+                      "api-reference/endpoints/secret-rotations/supabase-api-key/list",
+                      "api-reference/endpoints/secret-rotations/supabase-api-key/rotate-secrets",
+                      "api-reference/endpoints/secret-rotations/supabase-api-key/update"
                     ]
                   },
                   {
