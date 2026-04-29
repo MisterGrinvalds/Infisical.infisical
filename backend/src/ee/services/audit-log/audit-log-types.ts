@@ -544,6 +544,7 @@ export enum EventType {
   CREATE_SECRET_ROTATION = "create-secret-rotation",
   UPDATE_SECRET_ROTATION = "update-secret-rotation",
   DELETE_SECRET_ROTATION = "delete-secret-rotation",
+  MOVE_SECRET_ROTATION = "move-secret-rotation",
   SECRET_ROTATION_ROTATE_SECRETS = "secret-rotation-rotate-secrets",
   RECONCILE_SECRET_ROTATION = "reconcile-secret-rotation",
 
@@ -2298,6 +2299,9 @@ interface CreateWebhookEvent {
     environment: string;
     secretPath: string;
     isDisabled: boolean;
+    eventsFilter?: {
+      eventName: string;
+    }[];
   };
 }
 
@@ -2308,6 +2312,9 @@ interface UpdateWebhookStatusEvent {
     environment: string;
     secretPath: string;
     isDisabled: boolean;
+    eventsFilter?: {
+      eventName: string;
+    }[];
   };
 }
 
@@ -4372,6 +4379,18 @@ interface UpdateSecretRotationEvent {
 interface DeleteSecretRotationEvent {
   type: EventType.DELETE_SECRET_ROTATION;
   metadata: TDeleteSecretRotationV2DTO;
+}
+
+interface MoveSecretRotationEvent {
+  type: EventType.MOVE_SECRET_ROTATION;
+  metadata: {
+    type: string;
+    rotationId: string;
+    sourceEnvironment: string;
+    sourceSecretPath: string;
+    destinationEnvironment: string;
+    destinationSecretPath: string;
+  };
 }
 
 interface RotateSecretRotationEvent {
@@ -6546,6 +6565,7 @@ export type Event =
   | CreateSecretRotationEvent
   | UpdateSecretRotationEvent
   | DeleteSecretRotationEvent
+  | MoveSecretRotationEvent
   | RotateSecretRotationEvent
   | ReconcileSecretRotationEvent
   | MicrosoftTeamsWorkflowIntegrationCreateEvent
