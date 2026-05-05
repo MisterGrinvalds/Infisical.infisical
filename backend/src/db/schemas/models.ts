@@ -93,6 +93,7 @@ export enum TableName {
   Webhook = "webhooks",
   Identity = "identities",
   IdentityAccessToken = "identity_access_tokens",
+  IdentityAccessTokenRevocation = "identity_access_token_revocations",
   IdentityTokenAuth = "identity_token_auths",
   IdentityUniversalAuth = "identity_universal_auths",
   IdentityKubernetesAuth = "identity_kubernetes_auths",
@@ -217,7 +218,9 @@ export enum TableName {
   OrgGatewayConfigV2 = "org_gateway_config_v2",
   Relay = "relays",
   GatewayV2 = "gateways_v2",
-  GatewayEnrollmentTokens = "gateway_enrollment_tokens",
+  ResourceAuthMethod = "resource_auth_methods",
+  ResourceAwsAuth = "resource_aws_auths",
+  ResourceTokenAuth = "resource_token_auths",
   GatewayPool = "gateway_pools",
   GatewayPoolMembership = "gateway_pool_memberships",
 
