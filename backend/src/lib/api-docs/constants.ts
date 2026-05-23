@@ -2825,7 +2825,9 @@ export const AppConnections = {
       authMethod: "The authentication method to use (password or ssh-key).",
       password: "The password for SSH authentication (required when authMethod is 'password').",
       privateKey: "The private key in PEM format for SSH authentication (required when authMethod is 'ssh-key').",
-      passphrase: "The passphrase for the private key, if encrypted (optional, only for 'ssh-key' authMethod)."
+      passphrase: "The passphrase for the private key, if encrypted (optional, only for 'ssh-key' authMethod).",
+      blockedUsers:
+        "A comma-separated list of usernames that are blocked from being used in operations like secret rotation (e.g., 'root,admin,ubuntu')."
     },
     DBT: {
       apiToken: "The API token used to authenticate with DBT.",
@@ -3699,5 +3701,25 @@ export const GATEWAYS = {
     iamRequestBody: "The base64-encoded body of the signed STS request.",
     iamRequestHeaders: "The base64-encoded headers of the sts:GetCallerIdentity signed request.",
     token: "The one-time enrollment token previously issued for this gateway (token method only)."
+  }
+} as const;
+
+export const RELAYS = {
+  CREATE: {
+    name: "Name of the relay.",
+    host: "Host address where the relay is reachable.",
+    authMethod:
+      "Auth method to configure on the relay. `aws` carries the AWS allowlists; `token` is configurationless and requires a separate POST /v2/relays/:id/token-auth/generate-enrollment-token call to mint the bootstrap token."
+  },
+  UPDATE: {
+    authMethod:
+      "Replacement auth method. Same shape as in create — `aws` with allowlists or `token` with no config. Existing relays keep working until they restart and re-authenticate via the new method."
+  },
+  LOGIN: {
+    relayId: "The ID of the relay logging in (AWS method only).",
+    iamHttpRequestMethod: "The HTTP request method used in the signed STS request.",
+    iamRequestBody: "The base64-encoded body of the signed STS request.",
+    iamRequestHeaders: "The base64-encoded headers of the sts:GetCallerIdentity signed request.",
+    token: "The one-time enrollment token previously issued for this relay (token method only)."
   }
 } as const;
