@@ -358,6 +358,7 @@ import { identityUaClientSecretDALFactory } from "@app/services/identity-ua/iden
 import { identityUaDALFactory } from "@app/services/identity-ua/identity-ua-dal";
 import { identityUaServiceFactory } from "@app/services/identity-ua/identity-ua-service";
 import { identityV2DALFactory } from "@app/services/identity-v2/identity-dal";
+import { identityMembershipV2DALFactory } from "@app/services/identity-v2/identity-membership-dal";
 import { identityV2ServiceFactory } from "@app/services/identity-v2/identity-service";
 import { integrationDALFactory } from "@app/services/integration/integration-dal";
 import { integrationServiceFactory } from "@app/services/integration/integration-service";
@@ -427,6 +428,7 @@ import { projectSshConfigDALFactory } from "@app/services/project/project-ssh-co
 import { projectBotDALFactory } from "@app/services/project-bot/project-bot-dal";
 import { projectBotServiceFactory } from "@app/services/project-bot/project-bot-service";
 import { projectEnvDALFactory } from "@app/services/project-env/project-env-dal";
+import { projectEnvQueueFactory } from "@app/services/project-env/project-env-queue";
 import { projectEnvServiceFactory } from "@app/services/project-env/project-env-service";
 import { projectKeyDALFactory } from "@app/services/project-key/project-key-dal";
 import { projectKeyServiceFactory } from "@app/services/project-key/project-key-service";
@@ -589,6 +591,7 @@ export const registerRoutes = async (
 
   const identityDAL = identityDALFactory(db);
   const identityV2DAL = identityV2DALFactory(db);
+  const identityMembershipV2DAL = identityMembershipV2DALFactory(db);
   const identityMetadataDAL = identityMetadataDALFactory(db);
   const identityAccessTokenDAL = identityAccessTokenDALFactory(db);
   const identityAccessTokenRevocationDAL = identityAccessTokenRevocationDALFactory(db);
@@ -1729,6 +1732,13 @@ export const registerRoutes = async (
     groupDAL
   });
 
+  const projectEnvQueue = projectEnvQueueFactory({
+    cronJob,
+    projectEnvDAL,
+    keyStore,
+    auditLogService
+  });
+
   const projectEnvService = projectEnvServiceFactory({
     permissionService,
     projectEnvDAL,
@@ -2018,8 +2028,10 @@ export const registerRoutes = async (
     licenseService,
     permissionService,
     identityDAL: identityV2DAL,
+    identityMembershipV2DAL,
     identityAccessTokenService,
-    keyStore
+    keyStore,
+    projectDAL
   });
 
   const identityProjectService = identityProjectServiceFactory({
@@ -2394,7 +2406,8 @@ export const registerRoutes = async (
   const cmekService = cmekServiceFactory({
     kmsDAL,
     kmsService,
-    permissionService
+    permissionService,
+    licenseService
   });
 
   const externalMigrationQueue = externalMigrationQueueFactory({
@@ -3399,6 +3412,7 @@ export const registerRoutes = async (
   telemetryQueue.startTelemetryCheck();
   telemetryQueue.startAggregatedEventsJob();
   dailyResourceCleanUp.init();
+  projectEnvQueue.init();
   healthAlert.init();
   pkiSyncCleanup.init();
   pkiDiscoveryQueue.startPkiDiscoveryScanQueue();
